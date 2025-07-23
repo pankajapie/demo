@@ -6,8 +6,13 @@ on:
   pull_request:
     branches: [ main, develop ]
 
+permissions:
+  checks: write
+  contents: read
+  id-token: write
+
 jobs:
-  build_and_deploy:
+  build_and_test:
     runs-on: ubuntu-latest
     
     steps:
@@ -35,6 +40,34 @@ jobs:
       
     - name: Build project
       run: npm run build
+
+  deploy:
+    needs: build_and_test
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        
+    - name: Cache dependencies
+      uses: actions/cache@v4
+      with:
+        path: ~/.npm
+        key: ${{ runner.OS }}-node-${{ hashFiles('**/package-lock.json') }}
+        restore-keys: |
+          ${{ runner.OS }}-node-
+        
+    - name: Install dependencies
+      run: npm install --legacy-peer-deps
+      
+    - name: Build project
+      run: npm run build
       
     - name: Deploy to Firebase
       uses: FirebaseExtended/action-hosting-deploy@v0
@@ -42,4 +75,38 @@ jobs:
         repoToken: ${{ secrets.GITHUB_TOKEN }}
         firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
         channelId: ${{ github.ref == 'refs/heads/main' && 'live' || 'develop' }}
+        projectId: devprocess-f4521
+
+  deploy_preview:
+    needs: build_and_test
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        
+    - name: Cache dependencies
+      uses: actions/cache@v4
+      with:
+        path: ~/.npm
+        key: ${{ runner.OS }}-node-${{ hashFiles('**/package-lock.json') }}
+        restore-keys: |
+          ${{ runner.OS }}-node-
+        
+    - name: Install dependencies
+      run: npm install --legacy-peer-deps
+      
+    - name: Build project
+      run: npm run build
+      
+    - name: Deploy Preview to Firebase
+      uses: FirebaseExtended/action-hosting-deploy@v0
+      with:
+        firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
         projectId: devprocess-f4521
