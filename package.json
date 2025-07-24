@@ -15,9 +15,15 @@
   },
   "scripts": {
     "start": "react-scripts start",
+    "start:dev": "REACT_APP_ENV=development react-scripts start",
+    "start:prod": "REACT_APP_ENV=production react-scripts start",
     "build": "react-scripts build",
+    "build:dev": "REACT_APP_ENV=development react-scripts build",
+    "build:prod": "REACT_APP_ENV=production react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "deploy:dev": "npm run build:dev && firebase hosting:channel:deploy dev --expires 30d",
+    "deploy:prod": "npm run build:prod && firebase deploy --only hosting"
   },
   "eslintConfig": {
     "extends": [
@@ -39,5 +45,9 @@
   },
   "devDependencies": {
     "firebase-tools": "^14.11.1"
+  },
+  "engines": {
+    "node": "^22.11.0",
+    "npm": ">=10.0.0"
   }
 }
