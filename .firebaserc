@@ -1,5 +1,18 @@
 {
   "projects": {
     "default": "devprocess-f4521"
-  }
+  },
+  "targets": {
+    "devprocess-f4521": {
+      "hosting": {
+        "development": [
+          "devprocess-f4521"
+        ],
+        "production": [
+          "devprocess-f4521"
+        ]
+      }
+    }
+  },
+  "etags": {}
 }
